@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>--- TODO ---</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.1/css/fontawesome.min.css">
+
+  </head>
+  <body>
+
+
+    
+    <h1> Chat </h1>
+
+    <h2 id="roomNumberToShow">  </h2>
+
+    <div id="chat"></div>
+
+    <input type="text" id="inputMessage" class="form-control" placeholder="Add message">
+
+    <button type="buttton " class="btn btn-primary" onclick="sendMessage()">Send Message</button>
+
+    <input type="number" id="roomNumber" class="form-control" placeholder="Add Room">
+
+    <button type="buttton " class="btn btn-primary" onclick="joinRoom()">Join Room</button>
+
+    <!-- Including Bootstrap JS (with its jQuery dependency) so that dynamic components work -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+
+      let messages=[];
+
+      let socket = io.connect('http://localhost:3000');
+
+      console.log('conneted');
+
+      socket.on('updatedMessages', (data)=> {
+
+        messages=data;
+        console.log("Updated messages");
+        updateChat();
+
+      });
+
+      function sendMessage(){
+
+        let message = document.getElementById('inputMessage').value;
+
+        let roomNumber = document.getElementById("roomNumber").value;
+
+        socket.emit("new_message", {message, roomNumber});
+
+      }
+
+      function updateChat(){
+
+        let chatContentHtml = "";
+
+        messages.forEach((element)=>{
+
+          chatContentHtml += (element + "<br>");
+
+        });
+
+        document.getElementById("chat").innerHTML = chatContentHtml;
+
+      }
+
+      function joinRoom(){
+
+        let roomNumber = document.getElementById("roomNumber").value;
+
+        document.getElementById("roomNumberToShow").innerHTML = ("Room: " + roomNumber)
+
+        socket.emit('join',roomNumber);
+
+        socket.emit('updateMessages', roomNumber)
+
+        updateChat();
+      }
+
+    </script>
+
+  </body>
+</html>
